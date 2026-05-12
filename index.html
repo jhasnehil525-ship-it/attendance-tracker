@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance Intel</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080c10;--surface:#0d1218;--surface2:#121920;--surface3:#182030;--border:rgba(99,183,255,0.10);--border2:rgba(99,183,255,0.22);--accent:#3ecfff;--accent2:#00ffa3;--accent3:#ff6b6b;--text:#e8f4ff;--text2:#7a9bb5;--text3:#3d5a72;--mono:'DM Mono',monospace;--display:'Syne',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(62,207,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(62,207,255,0.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;top:-30%;left:-20%;width:60%;height:60%;background:radial-gradient(ellipse,rgba(62,207,255,0.06) 0%,transparent 70%);pointer-events:none;z-index:0;animation:drift 12s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translate(0,0)}to{transform:translate(5%,8%)}}
+.container{position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:2.5rem 2rem 4rem}
+.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:3rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+.logo-tag{font-size:10px;letter-spacing:0.3em;color:var(--accent);text-transform:uppercase;margin-bottom:0.4rem}
+.logo-title{font-family:var(--display);font-size:2rem;font-weight:800;color:var(--text);letter-spacing:-0.02em;line-height:1}
+.logo-title span{color:var(--accent)}
+.header-status{text-align:right;font-size:11px;color:var(--text3);letter-spacing:0.05em}
+.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent2);margin-right:6px;animation:pulse 2s infinite;vertical-align:middle}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,163,0.4)}50%{opacity:0.7;box-shadow:0 0 0 5px rgba(0,255,163,0)}}
+.drop-panel{border:1.5px dashed var(--border2);border-radius:16px;background:var(--surface);padding:3rem 2rem;text-align:center;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;margin-bottom:2rem}
+.drop-panel::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(62,207,255,0.05) 0%,transparent 60%);pointer-events:none}
+.drop-panel:hover,.drop-panel.over{border-color:var(--accent);background:rgba(62,207,255,0.04);box-shadow:0 0 40px rgba(62,207,255,0.08)}
+.drop-icon{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--surface3),var(--surface2));border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:24px}
+.drop-title{font-family:var(--display);font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:0.4rem}
+.drop-sub{font-size:12px;color:var(--text2);letter-spacing:0.05em}
+.file-loaded{display:none;align-items:center;gap:12px;background:rgba(0,255,163,0.06);border:1px solid rgba(0,255,163,0.2);border-radius:10px;padding:0.75rem 1.25rem;margin-bottom:2rem;font-size:13px}
+.file-loaded .check{color:var(--accent2);font-size:18px}
+.file-loaded .fname{color:var(--text);font-weight:500}
+.file-loaded .fmeta{color:var(--text2);font-size:11px;margin-top:2px}
+.controls-panel{display:none;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem 1.75rem;margin-bottom:2rem}
+.controls-title{font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:var(--text3);margin-bottom:1.25rem}
+.controls-grid{display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text2)}
+.field input,.field select{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:13px;padding:8px 12px;height:38px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;color-scheme:dark}
+.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(62,207,255,0.1)}
+.field select option{background:#0d1218}
+.run-btn{height:38px;padding:0 1.75rem;background:var(--accent);color:#05090d;border:none;border-radius:8px;font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:0.05em;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:8px;white-space:nowrap;min-width:160px;justify-content:center}
+.run-btn:hover:not(:disabled){background:#6ee0ff;transform:translateY(-1px);box-shadow:0 8px 24px rgba(62,207,255,0.25)}
+.run-btn:disabled{opacity:0.6;cursor:not-allowed}
+.progress-wrap{display:none;margin-top:1rem}
+.progress-track{height:4px;background:var(--surface3);border-radius:4px;overflow:hidden}
+.progress-bar-anim{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;width:0%;transition:width 0.3s ease}
+.progress-label{font-size:11px;color:var(--text2);margin-top:6px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent-color,var(--accent)),transparent);opacity:0.6}
+.stat-n{font-family:var(--display);font-size:2.2rem;font-weight:800;color:var(--text);line-height:1;margin-bottom:0.4rem}
+.stat-n.green{color:var(--accent2)}.stat-n.red{color:var(--accent3)}.stat-n.blue{color:var(--accent)}
+.stat-label{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3)}
+.results-panel{display:none}
+.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
+.results-title{font-family:var(--display);font-size:1rem;font-weight:600;color:var(--text)}
+.results-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toggle-label{font-size:11px;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--border);border-radius:20px;transition:all 0.2s;user-select:none}
+.toggle-label:hover{border-color:var(--border2);color:var(--text)}
+.toggle-label input{accent-color:var(--accent)}
+.export-btn{font-size:11px;border:1px solid var(--border2);background:transparent;color:var(--accent);border-radius:20px;padding:6px 14px;cursor:pointer;font-family:var(--mono);transition:all 0.2s}
+.export-btn:hover{background:rgba(62,207,255,0.08);border-color:var(--accent)}
+.tbl-wrap{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
+.tbl-scroll{overflow:auto;max-height:560px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:var(--surface2);padding:10px 14px;text-align:left;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2;white-space:nowrap;font-weight:400}
+thead th.slot-hdr{text-align:center;font-size:9px;padding:10px 5px;min-width:54px}
+thead th.slot-hdr.is-half{color:var(--accent)}
+tbody td{padding:8px 14px;border-bottom:1px solid var(--border);color:var(--text2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--surface2);color:var(--text)}
+td.lead-email{color:var(--text);font-size:12px;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+td.slot-cell{text-align:center;padding:8px 3px}
+td.slot-yes{color:var(--accent2)}
+td.slot-no{color:var(--surface3)}
+td.score{color:var(--accent);font-weight:500}
+td.score-zero{color:var(--text3)}
+.mini-bar{height:3px;border-radius:2px;background:var(--surface3);margin-top:4px;overflow:hidden;width:70px}
+.mini-fill{height:100%;background:var(--accent2);border-radius:2px}
+.err-msg{background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.25);border-radius:10px;padding:1rem 1.25rem;font-size:13px;color:var(--accent3);margin-bottom:1.5rem;display:none}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.animate{animation:fadeUp 0.35s ease both}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header animate">
+    <div>
+      <div class="logo-tag">// Session Intelligence</div>
+      <div class="logo-title">Attendance<span>Intel</span></div>
+    </div>
+    <div class="header-status">
+      <div><span class="status-dot"></span>READY</div>
+      <div style="margin-top:4px">Zoom Attendance Analyzer</div>
+    </div>
+  </div>
+
+  <div class="err-msg" id="errMsg"></div>
+
+  <div class="drop-panel animate" id="dz">
+    <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none">
+    <div class="drop-icon">📊</div>
+    <div class="drop-title">Drop your Zoom Excel report here</div>
+    <div class="drop-sub">Supports .xlsx &amp; .xls &nbsp;·&nbsp; Lead columns auto-detected</div>
+  </div>
+
+  <div class="file-loaded" id="fileLoaded">
+    <span class="check">✓</span>
+    <div>
+      <div class="fname" id="fName"></div>
+      <div class="fmeta" id="fMeta"></div>
+    </div>
+  </div>
+
+  <div class="controls-panel animate" id="controlsPanel">
+    <div class="controls-title">// Analysis Parameters</div>
+    <div class="controls-grid">
+      <div class="field">
+        <label>Meeting Date</label>
+        <input type="date" id="meetDate" value="2026-10-05">
+      </div>
+      <div class="field">
+        <label>Start Time</label>
+        <input type="time" id="startTime" value="10:55">
+      </div>
+      <div class="field">
+        <label>End Time</label>
+        <input type="time" id="endTime" value="15:00">
+      </div>
+      <div class="field">
+        <label>Slot Interval</label>
+        <select id="interval">
+          <option value="5" selected>5 minutes</option>
+          <option value="10">10 minutes</option>
+          <option value="15">15 minutes</option>
+          <option value="1">1 minute</option>
+        </select>
+      </div>
+      <button class="run-btn" id="runBtn" onclick="runAnalysis()">▶ Run Analysis</button>
+    </div>
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-track"><div class="progress-bar-anim" id="progressBar"></div></div>
+      <div class="progress-label" id="progressLabel">Processing…</div>
+    </div>
+  </div>
+
+  <div class="stats-row" id="statsRow" style="display:none"></div>
+
+  <div class="results-panel animate" id="resultsPanel">
+    <div class="results-header">
+      <div class="results-title">Lead Presence Matrix</div>
+      <div class="results-actions">
+        <label class="toggle-label">
+          <input type="checkbox" id="onlyPresent" onchange="renderTable()"> Attended only
+        </label>
+        <button class="export-btn" onclick="exportCSV()">↓ Export CSV</button>
+      </div>
+    </div>
+    <div class="tbl-wrap"><div class="tbl-scroll"><table id="resultTable"></table></div></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+var attendeeRows = []; // {email, phone, join (mins from midnight), leave (mins)}
+var leadsRows    = []; // {email, phone}
+var slots        = []; // minutes from midnight
+var results      = []; // {lead, presence:{slotMin:bool}, totalPresent}
+
+// ── Drop zone ──────────────────────────────────────────────────────────────
+var dz = document.getElementById('dz');
+var fi = document.getElementById('fileInput');
+dz.addEventListener('click', function(){ fi.click(); });
+dz.addEventListener('dragover', function(e){ e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', function(){ dz.classList.remove('over'); });
+dz.addEventListener('drop', function(e){ e.preventDefault(); dz.classList.remove('over'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+fi.addEventListener('change', function(e){ if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+function showErr(msg){ var el=document.getElementById('errMsg'); el.textContent=msg; el.style.display=msg?'block':'none'; }
+
+// ── Phone / email normalisation ────────────────────────────────────────────
+function normPhone(p){
+  if(p===null||p===undefined||p==='') return '';
+  var s=String(p).trim().replace(/[\s\-\.\(\)\/]/g,'');
+  if(s.charAt(0)==='+') s=s.slice(1);
+  s=s.replace(/\D/g,'');
+  if(s.length===12&&s.slice(0,2)==='91') s=s.slice(2);
+  if(s.length===11&&s.charAt(0)==='0')   s=s.slice(1);
+  return s;
+}
+function normEmail(e){ return e?String(e).trim().toLowerCase():''; }
+
+// ── Column finder ──────────────────────────────────────────────────────────
+function findCol(keys, hints){
+  // 1. Exact normalised match
+  for(var i=0;i<keys.length;i++){
+    var kn=keys[i].toLowerCase().replace(/[\s_\-]/g,'');
+    for(var j=0;j<hints.length;j++) if(kn===hints[j].toLowerCase().replace(/[\s_\-]/g,'')) return keys[i];
+  }
+  // 2. Partial match
+  for(var i=0;i<keys.length;i++){
+    var kn=keys[i].toLowerCase().replace(/[\s_\-]/g,'');
+    for(var j=0;j<hints.length;j++) if(kn.indexOf(hints[j].toLowerCase().replace(/[\s_\-]/g,''))!==-1) return keys[i];
+  }
+  return '';
+}
+
+// ── Excel date → minutes from midnight (for that day) ─────────────────────
+// We only care about HH:MM for slot comparison, but keep full Date for date auto-detect
+function parseExcelDate(v){
+  if(v===null||v===undefined||v==='') return null;
+  if(typeof v==='number'){
+    try{ var d=XLSX.SSF.parse_date_code(v); if(d) return new Date(d.y,d.m-1,d.d,d.H,d.M,Math.floor(d.S||0)); }catch(e){}
+    return null;
+  }
+  if(typeof v==='string'){
+    var s=v.trim(); if(!s) return null;
+    var m1=s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})[T\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    if(m1) return new Date(+m1[3],+m1[2]-1,+m1[1],+m1[4],+m1[5],+(m1[6]||0));
+    var m2=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})[T\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    if(m2) return new Date(+m2[1],+m2[2]-1,+m2[3],+m2[4],+m2[5],+(m2[6]||0));
+    var d2=new Date(s); if(!isNaN(d2.getTime())) return d2;
+  }
+  return null;
+}
+function toMins(dt){ return dt ? dt.getHours()*60+dt.getMinutes() : -1; }
+
+// ── File handler ───────────────────────────────────────────────────────────
+function handleFile(file){
+  showErr('');
+  var reader=new FileReader();
+  reader.onerror=function(){ showErr('Failed to read file.'); };
+  reader.onload=function(e){
+    try{
+      var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:false,raw:false});
+      var ws=wb.Sheets[wb.SheetNames[0]];
+      var rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});
+      if(!rows.length){ showErr('No data found.'); return; }
+
+      var keys=Object.keys(rows[0]);
+      var emailCol      =findCol(keys,['email','Email']);
+      var phoneCol      =findCol(keys,['phone','Phone']);
+      var joinCol       =findCol(keys,['JoinTime','Join Time','jointime','join time']);
+      var leaveCol      =findCol(keys,['LeaveTime','Leave Time','leavetime','leave time']);
+      var leadsEmailCol =findCol(keys,['Leads email','leads email','Lead email','lead email','Leadsema','Leadema','LeadsEmail','LeadEmail']);
+      var leadsPhoneCol =findCol(keys,['Leads phone','leads phone','Lead phone','lead phone','LeadsPhone','LeadPhone']);
+
+      if(!joinCol||!leaveCol){ showErr('Cannot find Join/Leave Time columns. Found: '+keys.join(', ')); return; }
+      if(!leadsEmailCol&&!leadsPhoneCol){ showErr('Cannot find Leads Email/Phone columns. Found: '+keys.join(', ')); return; }
+
+      // Build attendee index: store as {email, phone, joinMins, leaveMins}
+      attendeeRows=[];
+      var dateGuess=null;
+      for(var i=0;i<rows.length;i++){
+        var r=rows[i];
+        var jd=parseExcelDate(r[joinCol]);
+        var ld=parseExcelDate(r[leaveCol]);
+        var em=normEmail(r[emailCol]);
+        var ph=normPhone(r[phoneCol]);
+        if((em||ph)&&jd&&ld){
+          if(!dateGuess) dateGuess=jd;
+          attendeeRows.push({email:em,phone:ph,joinMins:toMins(jd),leaveMins:toMins(ld)});
+        }
+      }
+
+      // Build unique leads
+      var seen={};
+      leadsRows=[];
+      for(var i=0;i<rows.length;i++){
+        var r=rows[i];
+        var lem=normEmail(r[leadsEmailCol]);
+        var lph=normPhone(r[leadsPhoneCol]);
+        if(!lem&&!lph) continue;
+        var key=lem+'||'+lph;
+        if(!seen[key]){ seen[key]=true; leadsRows.push({email:lem,phone:lph}); }
+      }
+
+      // Auto-date
+      if(dateGuess){
+        var y=dateGuess.getFullYear();
+        var mo=String(dateGuess.getMonth()+1).padStart(2,'0');
+        var dy=String(dateGuess.getDate()).padStart(2,'0');
+        document.getElementById('meetDate').value=y+'-'+mo+'-'+dy;
+      }
+
+      document.getElementById('fName').textContent=file.name;
+      document.getElementById('fMeta').textContent=attendeeRows.length+' attendee records · '+leadsRows.length+' unique leads';
+      document.getElementById('fileLoaded').style.display='flex';
+      document.getElementById('controlsPanel').style.display='block';
+      document.getElementById('statsRow').style.display='none';
+      document.getElementById('resultsPanel').style.display='none';
+
+    }catch(err){ console.error(err); showErr('Parse error: '+err.message); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── Core analysis — hash map approach O(attendees + leads*slots) ───────────
+// Strategy:
+//  1. For each attendee row, for each slot minute, store email→true & phone→true
+//     in a Set per slot. This is O(attendees * slots).
+//  2. For each lead, check if their email or phone is in the set for that slot.
+//     This is O(leads * slots) with O(1) set lookup.
+// Total: O((attendees + leads) * slots) instead of O(attendees * leads * slots)
+
+function runAnalysis(){
+  showErr('');
+  if(!attendeeRows.length){ showErr('Upload a file first.'); return; }
+
+  var dp=document.getElementById('meetDate').value.split('-');
+  var yr=+dp[0],mo=+dp[1],dy_=+dp[2];
+  // We don't need date for mins-from-midnight comparison — already extracted
+  // But keep for reference; all rows assumed same meeting day
+
+  var sp=document.getElementById('startTime').value.split(':');
+  var ep=document.getElementById('endTime').value.split(':');
+  var sh=+sp[0],sm=+sp[1],eh=+ep[0],em_=+ep[1];
+  var interval=parseInt(document.getElementById('interval').value,10);
+
+  slots=[];
+  var cur=sh*60+sm, endm=eh*60+em_;
+  while(cur<=endm){ slots.push(cur); cur+=interval; }
+  if(!slots.length){ showErr('No slots — check times.'); return; }
+
+  var btn=document.getElementById('runBtn');
+  btn.disabled=true; btn.textContent='⏳ Building index…';
+
+  var pw=document.getElementById('progressWrap');
+  var pb=document.getElementById('progressBar');
+  var pl=document.getElementById('progressLabel');
+  pw.style.display='block'; pb.style.width='0%';
+
+  // Use chunked async processing to keep UI responsive
+  setTimeout(function(){
+    try{
+      // ── Step 1: build per-slot presence sets ──────────────────────────────
+      // slotSets[i] = {emails: Set, phones: Set} for slots[i]
+      var slotSets=[];
+      for(var si=0;si<slots.length;si++) slotSets.push({emails:new Set(),phones:new Set()});
+
+      for(var ai=0;ai<attendeeRows.length;ai++){
+        var att=attendeeRows[ai];
+        var jm=att.joinMins, lm=att.leaveMins;
+        for(var si=0;si<slots.length;si++){
+          var s=slots[si];
+          if(jm<=s&&lm>=s){
+            if(att.email) slotSets[si].emails.add(att.email);
+            if(att.phone) slotSets[si].phones.add(att.phone);
+          }
+        }
+      }
+
+      pl.textContent='Matching leads…';
+      pb.style.width='50%';
+
+      // ── Step 2: check each lead against slot sets ─────────────────────────
+      results=[];
+      for(var li=0;li<leadsRows.length;li++){
+        var lead=leadsRows[li];
+        var presence={};
+        var total=0;
+        for(var si=0;si<slots.length;si++){
+          var hit=false;
+          if(lead.email && slotSets[si].emails.has(lead.email)) hit=true;
+          if(!hit && lead.phone && slotSets[si].phones.has(lead.phone)) hit=true;
+          presence[slots[si]]=hit;
+          if(hit) total++;
+        }
+        results.push({lead:lead,presence:presence,totalPresent:total});
+      }
+
+      results.sort(function(a,b){ return b.totalPresent-a.totalPresent; });
+
+      pb.style.width='90%';
+      pl.textContent='Rendering…';
+
+      setTimeout(function(){
+        var attended=results.filter(function(r){ return r.totalPresent>0; }).length;
+        var absent=results.length-attended;
+
+        var sr=document.getElementById('statsRow');
+        sr.style.display='grid';
+        var sd=[
+          {n:results.length,label:'Total Leads', cls:'',      c:'#3ecfff'},
+          {n:attended,      label:'Attended',    cls:'green', c:'#00ffa3'},
+          {n:absent,        label:'Absent',      cls:'red',   c:'#ff6b6b'},
+          {n:slots.length,  label:'Time Slots',  cls:'blue',  c:'#3ecfff'}
+        ];
+        sr.innerHTML=sd.map(function(s){
+          return '<div class="stat-card" style="--accent-color:'+s.c+'"><div class="stat-n '+s.cls+'">'+s.n+'</div><div class="stat-label">'+s.label+'</div></div>';
+        }).join('');
+
+        document.getElementById('resultsPanel').style.display='block';
+        renderTable();
+
+        pb.style.width='100%';
+        pl.textContent='Done in seconds ✓';
+        btn.textContent='▶ Run Again';
+        btn.disabled=false;
+        setTimeout(function(){ pw.style.display='none'; },2000);
+      },30);
+
+    }catch(err){
+      console.error(err);
+      showErr('Analysis error: '+err.message);
+      btn.textContent='▶ Run Analysis';
+      btn.disabled=false;
+      pw.style.display='none';
+    }
+  },30);
+}
+
+// ── Table render ───────────────────────────────────────────────────────────
+function fmtSlot(m){ var h=Math.floor(m/60),mn=m%60,ap=h>=12?'PM':'AM',hh=h>12?h-12:(h===0?12:h); return hh+':'+(mn<10?'0':'')+mn+' '+ap; }
+
+function renderTable(){
+  var onlyPresent=document.getElementById('onlyPresent').checked;
+  var filtered=onlyPresent?results.filter(function(r){ return r.totalPresent>0; }):results;
+  var t=document.getElementById('resultTable');
+
+  var head='<thead><tr><th style="min-width:200px">Lead Identifier</th><th style="min-width:110px">Score</th>';
+  for(var si=0;si<slots.length;si++){
+    var isH=slots[si]%30===0;
+    head+='<th class="slot-hdr'+(isH?' is-half':'')+'">'+fmtSlot(slots[si])+'</th>';
+  }
+  head+='</tr></thead>';
+
+  var body='<tbody>';
+  for(var ri=0;ri<filtered.length;ri++){
+    var r=filtered[ri];
+    var pct=slots.length?Math.round(r.totalPresent/slots.length*100):0;
+    var id=r.lead.email||r.lead.phone||'—';
+    body+='<tr><td class="lead-email" title="'+id+'">'+id+'</td>';
+    if(r.totalPresent>0){
+      body+='<td class="score"><div>'+r.totalPresent+'/'+slots.length+'</div><div class="mini-bar"><div class="mini-fill" style="width:'+pct+'%"></div></div></td>';
+    } else {
+      body+='<td class="score-zero">0/'+slots.length+'</td>';
+    }
+    for(var si=0;si<slots.length;si++){
+      body+=r.presence[slots[si]]
+        ?'<td class="slot-cell slot-yes">●</td>'
+        :'<td class="slot-cell slot-no">·</td>';
+    }
+    body+='</tr>';
+  }
+  if(!filtered.length) body+='<tr><td colspan="'+(2+slots.length)+'" style="text-align:center;padding:2rem;color:#3d5a72">No results match filter</td></tr>';
+  body+='</tbody>';
+  t.innerHTML=head+body;
+}
+
+// ── CSV export ─────────────────────────────────────────────────────────────
+function exportCSV(){
+  if(!results.length) return;
+  var csv='Lead Email,Lead Phone,Slots Present,Total Slots';
+  for(var si=0;si<slots.length;si++) csv+=','+fmtSlot(slots[si]);
+  csv+='\n';
+  for(var ri=0;ri<results.length;ri++){
+    var r=results[ri];
+    csv+='"'+(r.lead.email||'')+'","'+(r.lead.phone||'')+'",'+r.totalPresent+','+slots.length;
+    for(var si=0;si<slots.length;si++) csv+=','+(r.presence[slots[si]]?'Yes':'No');
+    csv+='\n';
+  }
+  var blob=new Blob([csv],{type:'text/csv'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='attendance_intel.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
