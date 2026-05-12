@@ -68,12 +68,16 @@ thead th.slot-hdr{text-align:center;font-size:9px;padding:10px 5px;min-width:54p
 thead th.slot-hdr.is-half{color:var(--accent)}
 tbody td{padding:8px 14px;border-bottom:1px solid var(--border);color:var(--text2);white-space:nowrap}
 tbody tr:last-child td{border-bottom:none}
-tbody tr:hover td{background:var(--surface2);color:var(--text)}
+tbody tr.data-row{height:40px}
+tbody tr.data-row td{padding:4px 14px;vertical-align:middle}
+tbody tr.data-row:hover td{background:var(--surface2);color:var(--text)}
+tbody tr.spacer td{padding:0;border:none;background:transparent}
+tbody tr.spacer:hover td{background:transparent}
 td.lead-email{color:var(--text);font-size:12px;max-width:220px;overflow:hidden;text-overflow:ellipsis}
-td.slot-cell{text-align:center;padding:8px 3px}
+td.slot-cell{text-align:center;padding:4px 3px !important}
 td.slot-yes{color:var(--accent2)}
 td.slot-no{color:var(--surface3)}
-td.score{color:var(--accent);font-weight:500}
+td.score{color:var(--accent);font-weight:500;line-height:1.15}
 td.score-zero{color:var(--text3)}
 .mini-bar{height:3px;border-radius:2px;background:var(--surface3);margin-top:4px;overflow:hidden;width:70px}
 .mini-fill{height:100%;background:var(--accent2);border-radius:2px}
@@ -156,17 +160,22 @@ td.score-zero{color:var(--text3)}
         <button class="export-btn" onclick="exportCSV()">↓ Export CSV</button>
       </div>
     </div>
-    <div class="tbl-wrap"><div class="tbl-scroll"><table id="resultTable"></table></div></div>
+    <div class="tbl-wrap"><div class="tbl-scroll" id="tblScroll"><table id="resultTable"></table></div></div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 // ── State ──────────────────────────────────────────────────────────────────
-var attendeeRows = []; // {email, phone, join (mins from midnight), leave (mins)}
+var attendeeRows = []; // {email, phone, joinMins, leaveMins}
 var leadsRows    = []; // {email, phone}
 var slots        = []; // minutes from midnight
-var results      = []; // {lead, presence:{slotMin:bool}, totalPresent}
+var results      = []; // {lead, presence: Uint8Array, totalPresent}
+
+// Virtualization state — only render visible rows in the DOM
+var ROW_H = 40;           // matches CSS .data-row height
+var BUFFER = 15;          // extra rows above/below viewport
+var vState = { filtered: [], headerHTML: '', start: -1, end: -1, raf: null, wired: false };
 
 // ── Drop zone ──────────────────────────────────────────────────────────────
 var dz = document.getElementById('dz');
@@ -193,12 +202,10 @@ function normEmail(e){ return e?String(e).trim().toLowerCase():''; }
 
 // ── Column finder ──────────────────────────────────────────────────────────
 function findCol(keys, hints){
-  // 1. Exact normalised match
   for(var i=0;i<keys.length;i++){
     var kn=keys[i].toLowerCase().replace(/[\s_\-]/g,'');
     for(var j=0;j<hints.length;j++) if(kn===hints[j].toLowerCase().replace(/[\s_\-]/g,'')) return keys[i];
   }
-  // 2. Partial match
   for(var i=0;i<keys.length;i++){
     var kn=keys[i].toLowerCase().replace(/[\s_\-]/g,'');
     for(var j=0;j<hints.length;j++) if(kn.indexOf(hints[j].toLowerCase().replace(/[\s_\-]/g,''))!==-1) return keys[i];
@@ -206,8 +213,7 @@ function findCol(keys, hints){
   return '';
 }
 
-// ── Excel date → minutes from midnight (for that day) ─────────────────────
-// We only care about HH:MM for slot comparison, but keep full Date for date auto-detect
+// ── Excel date → JS Date ───────────────────────────────────────────────────
 function parseExcelDate(v){
   if(v===null||v===undefined||v==='') return null;
   if(typeof v==='number'){
@@ -249,7 +255,6 @@ function handleFile(file){
       if(!joinCol||!leaveCol){ showErr('Cannot find Join/Leave Time columns. Found: '+keys.join(', ')); return; }
       if(!leadsEmailCol&&!leadsPhoneCol){ showErr('Cannot find Leads Email/Phone columns. Found: '+keys.join(', ')); return; }
 
-      // Build attendee index: store as {email, phone, joinMins, leaveMins}
       attendeeRows=[];
       var dateGuess=null;
       for(var i=0;i<rows.length;i++){
@@ -264,7 +269,6 @@ function handleFile(file){
         }
       }
 
-      // Build unique leads
       var seen={};
       leadsRows=[];
       for(var i=0;i<rows.length;i++){
@@ -276,7 +280,6 @@ function handleFile(file){
         if(!seen[key]){ seen[key]=true; leadsRows.push({email:lem,phone:lph}); }
       }
 
-      // Auto-date
       if(dateGuess){
         var y=dateGuess.getFullYear();
         var mo=String(dateGuess.getMonth()+1).padStart(2,'0');
@@ -285,7 +288,7 @@ function handleFile(file){
       }
 
       document.getElementById('fName').textContent=file.name;
-      document.getElementById('fMeta').textContent=attendeeRows.length+' attendee records · '+leadsRows.length+' unique leads';
+      document.getElementById('fMeta').textContent=attendeeRows.length.toLocaleString()+' attendee records · '+leadsRows.length.toLocaleString()+' unique leads';
       document.getElementById('fileLoaded').style.display='flex';
       document.getElementById('controlsPanel').style.display='block';
       document.getElementById('statsRow').style.display='none';
@@ -296,22 +299,16 @@ function handleFile(file){
   reader.readAsArrayBuffer(file);
 }
 
-// ── Core analysis — hash map approach O(attendees + leads*slots) ───────────
+// ── Core analysis ──────────────────────────────────────────────────────────
 // Strategy:
-//  1. For each attendee row, for each slot minute, store email→true & phone→true
-//     in a Set per slot. This is O(attendees * slots).
-//  2. For each lead, check if their email or phone is in the set for that slot.
-//     This is O(leads * slots) with O(1) set lookup.
-// Total: O((attendees + leads) * slots) instead of O(attendees * leads * slots)
-
+//  1. Per-slot Sets of emails/phones. For each attendee we only touch the slot
+//     RANGE they overlap (ceil/floor math), not every slot. O(attendees * avgPresent).
+//  2. For each lead, walk slots and look up in the Set. Uint8Array for presence
+//     keeps per-lead memory tiny (1 byte/slot vs ~50-100 bytes for object keys).
+//  3. Matching runs in chunks so the tab stays responsive on big files.
 function runAnalysis(){
   showErr('');
   if(!attendeeRows.length){ showErr('Upload a file first.'); return; }
-
-  var dp=document.getElementById('meetDate').value.split('-');
-  var yr=+dp[0],mo=+dp[1],dy_=+dp[2];
-  // We don't need date for mins-from-midnight comparison — already extracted
-  // But keep for reference; all rows assumed same meeting day
 
   var sp=document.getElementById('startTime').value.split(':');
   var ep=document.getElementById('endTime').value.split(':');
@@ -322,6 +319,7 @@ function runAnalysis(){
   var cur=sh*60+sm, endm=eh*60+em_;
   while(cur<=endm){ slots.push(cur); cur+=interval; }
   if(!slots.length){ showErr('No slots — check times.'); return; }
+  var startMin = slots[0];
 
   var btn=document.getElementById('runBtn');
   btn.disabled=true; btn.textContent='⏳ Building index…';
@@ -330,76 +328,93 @@ function runAnalysis(){
   var pb=document.getElementById('progressBar');
   var pl=document.getElementById('progressLabel');
   pw.style.display='block'; pb.style.width='0%';
+  pl.textContent='Building slot index…';
 
-  // Use chunked async processing to keep UI responsive
   setTimeout(function(){
     try{
-      // ── Step 1: build per-slot presence sets ──────────────────────────────
-      // slotSets[i] = {emails: Set, phones: Set} for slots[i]
-      var slotSets=[];
-      for(var si=0;si<slots.length;si++) slotSets.push({emails:new Set(),phones:new Set()});
+      // Step 1: build per-slot presence sets using slot-range arithmetic
+      var slotSets=new Array(slots.length);
+      for(var si=0;si<slots.length;si++) slotSets[si]={emails:new Set(),phones:new Set()};
 
       for(var ai=0;ai<attendeeRows.length;ai++){
         var att=attendeeRows[ai];
-        var jm=att.joinMins, lm=att.leaveMins;
-        for(var si=0;si<slots.length;si++){
-          var s=slots[si];
-          if(jm<=s&&lm>=s){
-            if(att.email) slotSets[si].emails.add(att.email);
-            if(att.phone) slotSets[si].phones.add(att.phone);
-          }
+        var firstSi = Math.max(0, Math.ceil((att.joinMins  - startMin) / interval));
+        var lastSi  = Math.min(slots.length - 1, Math.floor((att.leaveMins - startMin) / interval));
+        for(var si=firstSi; si<=lastSi; si++){
+          if(att.email) slotSets[si].emails.add(att.email);
+          if(att.phone) slotSets[si].phones.add(att.phone);
         }
       }
 
+      pb.style.width='40%';
       pl.textContent='Matching leads…';
-      pb.style.width='50%';
 
-      // ── Step 2: check each lead against slot sets ─────────────────────────
-      results=[];
-      for(var li=0;li<leadsRows.length;li++){
-        var lead=leadsRows[li];
-        var presence={};
-        var total=0;
-        for(var si=0;si<slots.length;si++){
-          var hit=false;
-          if(lead.email && slotSets[si].emails.has(lead.email)) hit=true;
-          if(!hit && lead.phone && slotSets[si].phones.has(lead.phone)) hit=true;
-          presence[slots[si]]=hit;
-          if(hit) total++;
+      // Step 2: chunked matching — keeps the UI thread responsive
+      results = [];
+      var li = 0;
+      var totalLeads = leadsRows.length;
+      var CHUNK = 2000;
+
+      function matchChunk() {
+        var stop = Math.min(li + CHUNK, totalLeads);
+        for (; li < stop; li++) {
+          var lead = leadsRows[li];
+          var presence = new Uint8Array(slots.length);
+          var total = 0;
+          for (var si = 0; si < slots.length; si++) {
+            var hit = false;
+            if (lead.email && slotSets[si].emails.has(lead.email)) hit = true;
+            else if (lead.phone && slotSets[si].phones.has(lead.phone)) hit = true;
+            if (hit) { presence[si] = 1; total++; }
+          }
+          results.push({ lead: lead, presence: presence, totalPresent: total });
         }
-        results.push({lead:lead,presence:presence,totalPresent:total});
+
+        if (li < totalLeads) {
+          var pct = 40 + Math.round(50 * li / totalLeads);
+          pb.style.width = pct + '%';
+          pl.textContent = 'Matching leads… ' + li.toLocaleString() + ' / ' + totalLeads.toLocaleString();
+          setTimeout(matchChunk, 0);
+        } else {
+          finishAnalysis();
+        }
       }
 
-      results.sort(function(a,b){ return b.totalPresent-a.totalPresent; });
+      function finishAnalysis() {
+        results.sort(function(a,b){ return b.totalPresent - a.totalPresent; });
 
-      pb.style.width='90%';
-      pl.textContent='Rendering…';
+        pb.style.width = '90%';
+        pl.textContent = 'Rendering…';
 
-      setTimeout(function(){
-        var attended=results.filter(function(r){ return r.totalPresent>0; }).length;
-        var absent=results.length-attended;
+        setTimeout(function() {
+          var attended = 0;
+          for (var i = 0; i < results.length; i++) if (results[i].totalPresent > 0) attended++;
+          var absent = results.length - attended;
 
-        var sr=document.getElementById('statsRow');
-        sr.style.display='grid';
-        var sd=[
-          {n:results.length,label:'Total Leads', cls:'',      c:'#3ecfff'},
-          {n:attended,      label:'Attended',    cls:'green', c:'#00ffa3'},
-          {n:absent,        label:'Absent',      cls:'red',   c:'#ff6b6b'},
-          {n:slots.length,  label:'Time Slots',  cls:'blue',  c:'#3ecfff'}
-        ];
-        sr.innerHTML=sd.map(function(s){
-          return '<div class="stat-card" style="--accent-color:'+s.c+'"><div class="stat-n '+s.cls+'">'+s.n+'</div><div class="stat-label">'+s.label+'</div></div>';
-        }).join('');
+          var sr = document.getElementById('statsRow');
+          sr.style.display = 'grid';
+          var sd = [
+            {n:results.length, label:'Total Leads', cls:'',      c:'#3ecfff'},
+            {n:attended,       label:'Attended',    cls:'green', c:'#00ffa3'},
+            {n:absent,         label:'Absent',      cls:'red',   c:'#ff6b6b'},
+            {n:slots.length,   label:'Time Slots',  cls:'blue',  c:'#3ecfff'}
+          ];
+          sr.innerHTML = sd.map(function(s){
+            return '<div class="stat-card" style="--accent-color:'+s.c+'"><div class="stat-n '+s.cls+'">'+s.n.toLocaleString()+'</div><div class="stat-label">'+s.label+'</div></div>';
+          }).join('');
 
-        document.getElementById('resultsPanel').style.display='block';
-        renderTable();
+          document.getElementById('resultsPanel').style.display = 'block';
+          renderTable();
 
-        pb.style.width='100%';
-        pl.textContent='Done in seconds ✓';
-        btn.textContent='▶ Run Again';
-        btn.disabled=false;
-        setTimeout(function(){ pw.style.display='none'; },2000);
-      },30);
+          pb.style.width = '100%';
+          pl.textContent = 'Done ✓';
+          btn.textContent = '▶ Run Again';
+          btn.disabled = false;
+          setTimeout(function(){ pw.style.display = 'none'; }, 2000);
+        }, 30);
+      }
+
+      matchChunk();
 
     }catch(err){
       console.error(err);
@@ -408,63 +423,130 @@ function runAnalysis(){
       btn.disabled=false;
       pw.style.display='none';
     }
-  },30);
+  }, 30);
 }
 
-// ── Table render ───────────────────────────────────────────────────────────
+// ── Formatting ─────────────────────────────────────────────────────────────
 function fmtSlot(m){ var h=Math.floor(m/60),mn=m%60,ap=h>=12?'PM':'AM',hh=h>12?h-12:(h===0?12:h); return hh+':'+(mn<10?'0':'')+mn+' '+ap; }
 
-function renderTable(){
-  var onlyPresent=document.getElementById('onlyPresent').checked;
-  var filtered=onlyPresent?results.filter(function(r){ return r.totalPresent>0; }):results;
-  var t=document.getElementById('resultTable');
+// ── Table render — VIRTUALIZED ─────────────────────────────────────────────
+// We never put the full table in the DOM. Only the visible window (~30 rows)
+// plus two spacer rows that hold open the scroll height. This keeps the DOM
+// node count constant regardless of how many leads we have.
 
-  var head='<thead><tr><th style="min-width:200px">Lead Identifier</th><th style="min-width:110px">Score</th>';
-  for(var si=0;si<slots.length;si++){
-    var isH=slots[si]%30===0;
-    head+='<th class="slot-hdr'+(isH?' is-half':'')+'">'+fmtSlot(slots[si])+'</th>';
+function buildHeaderHTML() {
+  var h = '<thead><tr><th style="min-width:200px">Lead Identifier</th><th style="min-width:110px">Score</th>';
+  for (var si = 0; si < slots.length; si++) {
+    var isH = slots[si] % 30 === 0;
+    h += '<th class="slot-hdr' + (isH ? ' is-half' : '') + '">' + fmtSlot(slots[si]) + '</th>';
   }
-  head+='</tr></thead>';
-
-  var body='<tbody>';
-  for(var ri=0;ri<filtered.length;ri++){
-    var r=filtered[ri];
-    var pct=slots.length?Math.round(r.totalPresent/slots.length*100):0;
-    var id=r.lead.email||r.lead.phone||'—';
-    body+='<tr><td class="lead-email" title="'+id+'">'+id+'</td>';
-    if(r.totalPresent>0){
-      body+='<td class="score"><div>'+r.totalPresent+'/'+slots.length+'</div><div class="mini-bar"><div class="mini-fill" style="width:'+pct+'%"></div></div></td>';
-    } else {
-      body+='<td class="score-zero">0/'+slots.length+'</td>';
-    }
-    for(var si=0;si<slots.length;si++){
-      body+=r.presence[slots[si]]
-        ?'<td class="slot-cell slot-yes">●</td>'
-        :'<td class="slot-cell slot-no">·</td>';
-    }
-    body+='</tr>';
-  }
-  if(!filtered.length) body+='<tr><td colspan="'+(2+slots.length)+'" style="text-align:center;padding:2rem;color:#3d5a72">No results match filter</td></tr>';
-  body+='</tbody>';
-  t.innerHTML=head+body;
+  return h + '</tr></thead>';
 }
 
-// ── CSV export ─────────────────────────────────────────────────────────────
-function exportCSV(){
-  if(!results.length) return;
-  var csv='Lead Email,Lead Phone,Slots Present,Total Slots';
-  for(var si=0;si<slots.length;si++) csv+=','+fmtSlot(slots[si]);
-  csv+='\n';
-  for(var ri=0;ri<results.length;ri++){
-    var r=results[ri];
-    csv+='"'+(r.lead.email||'')+'","'+(r.lead.phone||'')+'",'+r.totalPresent+','+slots.length;
-    for(var si=0;si<slots.length;si++) csv+=','+(r.presence[slots[si]]?'Yes':'No');
-    csv+='\n';
+function buildRowHTML(r) {
+  var pct = slots.length ? Math.round(r.totalPresent / slots.length * 100) : 0;
+  var id = r.lead.email || r.lead.phone || '—';
+  var out = '<tr class="data-row"><td class="lead-email" title="' + id + '">' + id + '</td>';
+  if (r.totalPresent > 0) {
+    out += '<td class="score"><div>' + r.totalPresent + '/' + slots.length + '</div><div class="mini-bar"><div class="mini-fill" style="width:' + pct + '%"></div></div></td>';
+  } else {
+    out += '<td class="score-zero">0/' + slots.length + '</td>';
   }
-  var blob=new Blob([csv],{type:'text/csv'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url; a.download='attendance_intel.csv'; a.click();
+  for (var si = 0; si < slots.length; si++) {
+    out += r.presence[si]
+      ? '<td class="slot-cell slot-yes">●</td>'
+      : '<td class="slot-cell slot-no">·</td>';
+  }
+  return out + '</tr>';
+}
+
+function renderTable() {
+  var onlyPresent = document.getElementById('onlyPresent').checked;
+  vState.filtered = onlyPresent ? results.filter(function(r){ return r.totalPresent > 0; }) : results;
+  vState.headerHTML = buildHeaderHTML();
+  vState.start = -1;
+  vState.end   = -1;
+
+  var table = document.getElementById('resultTable');
+  table.innerHTML = vState.headerHTML + '<tbody id="resultTbody"></tbody>';
+
+  // Wire scroll listener once
+  if (!vState.wired) {
+    var sc = document.getElementById('tblScroll');
+    sc.addEventListener('scroll', function() {
+      if (vState.raf) return;
+      vState.raf = requestAnimationFrame(function() {
+        vState.raf = null;
+        updateVisibleRows();
+      });
+    });
+    vState.wired = true;
+  }
+
+  document.getElementById('tblScroll').scrollTop = 0;
+  updateVisibleRows();
+}
+
+function updateVisibleRows() {
+  var tbody = document.getElementById('resultTbody');
+  if (!tbody) return;
+  var filtered = vState.filtered;
+  var colSpan = 2 + slots.length;
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="' + colSpan + '" style="text-align:center;padding:2rem;color:#3d5a72">No results match filter</td></tr>';
+    return;
+  }
+
+  var sc = document.getElementById('tblScroll');
+  var scrollTop = sc.scrollTop;
+  var viewH = sc.clientHeight || 560;
+
+  var start = Math.max(0, Math.floor(scrollTop / ROW_H) - BUFFER);
+  var end   = Math.min(filtered.length, Math.ceil((scrollTop + viewH) / ROW_H) + BUFFER);
+
+  // Skip if the visible window hasn't moved
+  if (start === vState.start && end === vState.end) return;
+  vState.start = start;
+  vState.end   = end;
+
+  var topPad = start * ROW_H;
+  var botPad = (filtered.length - end) * ROW_H;
+
+  var parts = [];
+  if (topPad > 0) parts.push('<tr class="spacer"><td colspan="' + colSpan + '" style="height:' + topPad + 'px"></td></tr>');
+  for (var i = start; i < end; i++) parts.push(buildRowHTML(filtered[i]));
+  if (botPad > 0) parts.push('<tr class="spacer"><td colspan="' + colSpan + '" style="height:' + botPad + 'px"></td></tr>');
+
+  tbody.innerHTML = parts.join('');
+}
+
+// ── CSV export — streamed into a Blob to avoid one giant string ────────────
+function exportCSV() {
+  if (!results.length) return;
+
+  var chunks = [];
+  var header = 'Lead Email,Lead Phone,Slots Present,Total Slots';
+  for (var si = 0; si < slots.length; si++) header += ',' + fmtSlot(slots[si]);
+  header += '\n';
+  chunks.push(header);
+
+  var rowsPerChunk = 500;
+  var buf = '';
+  for (var ri = 0; ri < results.length; ri++) {
+    var r = results[ri];
+    buf += '"' + (r.lead.email || '') + '","' + (r.lead.phone || '') + '",' + r.totalPresent + ',' + slots.length;
+    for (var si = 0; si < slots.length; si++) buf += ',' + (r.presence[si] ? 'Yes' : 'No');
+    buf += '\n';
+    if ((ri + 1) % rowsPerChunk === 0) { chunks.push(buf); buf = ''; }
+  }
+  if (buf) chunks.push(buf);
+
+  var blob = new Blob(chunks, { type: 'text/csv;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'attendance_intel.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 </script>
