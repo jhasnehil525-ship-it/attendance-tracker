@@ -68,20 +68,53 @@ thead th.slot-hdr{text-align:center;font-size:9px;padding:10px 5px;min-width:54p
 thead th.slot-hdr.is-half{color:var(--accent)}
 tbody td{padding:8px 14px;border-bottom:1px solid var(--border);color:var(--text2);white-space:nowrap}
 tbody tr:last-child td{border-bottom:none}
-tbody tr.data-row{height:40px}
-tbody tr.data-row td{padding:4px 14px;vertical-align:middle}
-tbody tr.data-row:hover td{background:var(--surface2);color:var(--text)}
-tbody tr.spacer td{padding:0;border:none;background:transparent}
-tbody tr.spacer:hover td{background:transparent}
+tbody tr:hover td{background:var(--surface2);color:var(--text)}
 td.lead-email{color:var(--text);font-size:12px;max-width:220px;overflow:hidden;text-overflow:ellipsis}
-td.slot-cell{text-align:center;padding:4px 3px !important}
+td.slot-cell{text-align:center;padding:8px 3px}
 td.slot-yes{color:var(--accent2)}
 td.slot-no{color:var(--surface3)}
-td.score{color:var(--accent);font-weight:500;line-height:1.15}
+td.score{color:var(--accent);font-weight:500}
 td.score-zero{color:var(--text3)}
 .mini-bar{height:3px;border-radius:2px;background:var(--surface3);margin-top:4px;overflow:hidden;width:70px}
 .mini-fill{height:100%;background:var(--accent2);border-radius:2px}
 .err-msg{background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.25);border-radius:10px;padding:1rem 1.25rem;font-size:13px;color:var(--accent3);margin-bottom:1.5rem;display:none}
+.summary-panel{display:none;margin-top:2.5rem}
+.summary-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
+.summary-title{font-family:var(--display);font-size:1rem;font-weight:600;color:var(--text)}
+.summary-wrap{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}
+.summary-scroll{overflow:auto;max-height:600px}
+.summary-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.summary-tbl thead th{background:var(--surface2);padding:12px 20px;text-align:left;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2;font-weight:400;white-space:nowrap}
+.summary-tbl tbody td{padding:10px 20px;border-bottom:1px solid var(--border);color:var(--text2);white-space:nowrap}
+.summary-tbl tbody tr:last-child td{border-bottom:none}
+.summary-tbl tbody tr:hover td{background:var(--surface2);color:var(--text)}
+.summary-tbl td.time-col{color:var(--text);font-weight:500}
+.summary-tbl td.count-col{color:var(--accent);font-family:var(--display);font-weight:700;font-size:14px}
+.summary-tbl td.pct-col{color:var(--accent2);font-family:var(--display);font-weight:600}
+.summary-tbl td.is-peak{color:var(--accent2)}
+.summary-tbl tr.peak-row td{background:rgba(0,255,163,0.04)}
+.pagination{display:none;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:1rem;padding:0.75rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px}
+.pagination.active{display:flex}
+.page-info{font-size:11px;color:var(--text2);letter-spacing:0.05em}
+.page-nav{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.page-btn{background:transparent;border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all 0.15s}
+.page-btn:hover:not(:disabled){background:rgba(62,207,255,0.08);border-color:var(--accent);color:var(--accent)}
+.page-btn:disabled{opacity:0.35;cursor:not-allowed}
+.page-num{font-size:11px;color:var(--text);padding:0 10px;font-family:var(--mono);min-width:90px;text-align:center}
+.downloads-bar{display:none;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:2rem}
+.downloads-bar.active{display:block}
+.downloads-title{font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem}
+.downloads-actions{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+@media(max-width:680px){.downloads-actions{grid-template-columns:1fr}}
+.dl-btn{display:flex;align-items:center;gap:14px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 18px;color:var(--text);font-family:var(--mono);cursor:pointer;text-align:left;transition:all 0.2s}
+.dl-btn:hover{border-color:var(--accent);background:rgba(62,207,255,0.05);transform:translateY(-1px);box-shadow:0 4px 16px rgba(62,207,255,0.1)}
+.dl-btn.primary{background:linear-gradient(135deg,rgba(62,207,255,0.12),rgba(0,255,163,0.06));border-color:var(--accent)}
+.dl-btn.primary:hover{background:linear-gradient(135deg,rgba(62,207,255,0.2),rgba(0,255,163,0.1));box-shadow:0 4px 20px rgba(62,207,255,0.2)}
+.dl-icon{font-size:22px;color:var(--accent);flex-shrink:0;width:42px;height:42px;border-radius:10px;background:rgba(62,207,255,0.08);display:flex;align-items:center;justify-content:center}
+.dl-btn.primary .dl-icon{background:rgba(0,255,163,0.1);color:var(--accent2)}
+.dl-text{flex:1;min-width:0}
+.dl-label{font-family:var(--display);font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
+.dl-sub{font-size:11px;color:var(--text2);letter-spacing:0.03em}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .animate{animation:fadeUp 0.35s ease both}
 </style>
@@ -140,6 +173,10 @@ td.score-zero{color:var(--text3)}
           <option value="1">1 minute</option>
         </select>
       </div>
+      <div class="field">
+        <label>Session Label</label>
+        <input type="text" id="sessionLabel" value="Attendance" placeholder="e.g. Python (Snehil)" style="min-width:180px">
+      </div>
       <button class="run-btn" id="runBtn" onclick="runAnalysis()">▶ Run Analysis</button>
     </div>
     <div class="progress-wrap" id="progressWrap">
@@ -150,32 +187,84 @@ td.score-zero{color:var(--text3)}
 
   <div class="stats-row" id="statsRow" style="display:none"></div>
 
+  <div class="downloads-bar" id="downloadsBar">
+    <div class="downloads-title">// Download Reports</div>
+    <div class="downloads-actions">
+      <button class="dl-btn primary" onclick="downloadAttendanceTable()">
+        <div class="dl-icon">⬇</div>
+        <div class="dl-text">
+          <div class="dl-label">Download Attendance Table</div>
+          <div class="dl-sub">Time · Count · Percentage (per slot)</div>
+        </div>
+      </button>
+      <button class="dl-btn" onclick="exportCSV()">
+        <div class="dl-icon">⬇</div>
+        <div class="dl-text">
+          <div class="dl-label">Download Full Matrix</div>
+          <div class="dl-sub">Lead × Slot detailed CSV with totals</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
   <div class="results-panel animate" id="resultsPanel">
     <div class="results-header">
       <div class="results-title">Lead Presence Matrix</div>
       <div class="results-actions">
         <label class="toggle-label">
-          <input type="checkbox" id="onlyPresent" onchange="renderTable()"> Attended only
+          <input type="checkbox" id="onlyPresent" onchange="resetAndRender()"> Attended only
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="compactToggle" onchange="onCompactChange()"> Compact view
+        </label>
+        <label class="toggle-label" style="cursor:default">
+          Show
+          <select id="pageSize" onchange="onPageSizeChange()" style="background:transparent;border:none;color:var(--text);font-family:var(--mono);font-size:11px;outline:none;cursor:pointer">
+            <option value="50">50</option>
+            <option value="100" selected>100</option>
+            <option value="250">250</option>
+            <option value="500">500</option>
+          </select>
+          per page
         </label>
         <button class="export-btn" onclick="exportCSV()">↓ Export CSV</button>
       </div>
     </div>
-    <div class="tbl-wrap"><div class="tbl-scroll" id="tblScroll"><table id="resultTable"></table></div></div>
+    <div class="tbl-wrap"><div class="tbl-scroll"><table id="resultTable"></table></div></div>
+    <div class="pagination" id="pagination">
+      <div class="page-info" id="pageInfo"></div>
+      <div class="page-nav">
+        <button class="page-btn" id="firstBtn" onclick="goToPage(0)">« First</button>
+        <button class="page-btn" id="prevBtn" onclick="goToPage(currentPage-1)">‹ Prev</button>
+        <span class="page-num" id="pageNum"></span>
+        <button class="page-btn" id="nextBtn" onclick="goToPage(currentPage+1)">Next ›</button>
+        <button class="page-btn" id="lastBtn" onclick="goToLastPage()">Last »</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-panel" id="summaryPanel">
+    <div class="summary-header">
+      <div class="summary-title">Attendance Timeline · Per Slot</div>
+      <div class="results-actions">
+        <button class="export-btn" onclick="downloadAttendanceTable()">↓ Download Attendance Table</button>
+      </div>
+    </div>
+    <div class="summary-wrap"><div class="summary-scroll"><table class="summary-tbl" id="summaryTable"></table></div></div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 // ── State ──────────────────────────────────────────────────────────────────
-var attendeeRows = []; // {email, phone, joinMins, leaveMins}
+var attendeeRows = []; // {email, phone, join (mins from midnight), leave (mins)}
 var leadsRows    = []; // {email, phone}
 var slots        = []; // minutes from midnight
-var results      = []; // {lead, presence: Uint8Array, totalPresent}
-
-// Virtualization state — only render visible rows in the DOM
-var ROW_H = 40;           // matches CSS .data-row height
-var BUFFER = 15;          // extra rows above/below viewport
-var vState = { filtered: [], headerHTML: '', start: -1, end: -1, raf: null, wired: false };
+var results      = []; // {lead, presence:{slotMin:bool}, totalPresent}
+var slotCounts   = []; // count of leads present per slot (parallel to slots[])
+var currentPage  = 0;  // for pagination of the matrix
+var pageSize     = 100;
+var compactMode  = false; // hide slot-dot columns when true (huge data)
 
 // ── Drop zone ──────────────────────────────────────────────────────────────
 var dz = document.getElementById('dz');
@@ -202,10 +291,12 @@ function normEmail(e){ return e?String(e).trim().toLowerCase():''; }
 
 // ── Column finder ──────────────────────────────────────────────────────────
 function findCol(keys, hints){
+  // 1. Exact normalised match
   for(var i=0;i<keys.length;i++){
     var kn=keys[i].toLowerCase().replace(/[\s_\-]/g,'');
     for(var j=0;j<hints.length;j++) if(kn===hints[j].toLowerCase().replace(/[\s_\-]/g,'')) return keys[i];
   }
+  // 2. Partial match
   for(var i=0;i<keys.length;i++){
     var kn=keys[i].toLowerCase().replace(/[\s_\-]/g,'');
     for(var j=0;j<hints.length;j++) if(kn.indexOf(hints[j].toLowerCase().replace(/[\s_\-]/g,''))!==-1) return keys[i];
@@ -213,7 +304,17 @@ function findCol(keys, hints){
   return '';
 }
 
-// ── Excel date → JS Date ───────────────────────────────────────────────────
+// ── Excel date → minutes from midnight (for that day) ─────────────────────
+// Handles three cases:
+//  1) Excel numeric serial date (via SheetJS)
+//  2) String dates with optional AM/PM suffix — e.g. Zoom's US format
+//     "04/26/2026 10:49:22 AM"
+//  3) ISO-ish strings
+// Crucially: AM/PM is detected and applied (without it, "1:47 PM" would be
+// read as "1:47 AM" — a 12-hour error — and an attendee's leave time can
+// silently fall before their join time, dropping the row from analysis.)
+// Date-component order is inferred (MM/DD vs DD/MM) by checking which value
+// is >12; defaults to MM/DD when ambiguous, since Zoom exports US format.
 function parseExcelDate(v){
   if(v===null||v===undefined||v==='') return null;
   if(typeof v==='number'){
@@ -222,11 +323,44 @@ function parseExcelDate(v){
   }
   if(typeof v==='string'){
     var s=v.trim(); if(!s) return null;
+
+    // Detect & strip trailing AM/PM (case-insensitive, supports "A.M."/"P.M.")
+    var ampm=null;
+    var ampmRe=/\s*(AM|PM|am|pm|A\.M\.|P\.M\.|a\.m\.|p\.m\.)\s*$/;
+    var ampmMatch=s.match(ampmRe);
+    if(ampmMatch){
+      ampm = ampmMatch[1].charAt(0).toUpperCase()==='A' ? 'AM' : 'PM';
+      s = s.replace(ampmRe,'').trim();
+    }
+    function applyAmPm(h){
+      if(ampm==='PM' && h<12) return h+12;
+      if(ampm==='AM' && h===12) return 0;
+      return h;
+    }
+
+    // Date+time, MM/DD/YYYY or DD/MM/YYYY style (with - or /)
     var m1=s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})[T\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?/);
-    if(m1) return new Date(+m1[3],+m1[2]-1,+m1[1],+m1[4],+m1[5],+(m1[6]||0));
+    if(m1){
+      var p1=+m1[1], p2=+m1[2], yr=+m1[3];
+      var h=applyAmPm(+m1[4]), mn=+m1[5], sec=+(m1[6]||0);
+      // Infer day/month order. Default MM/DD (Zoom's locale).
+      var day, month;
+      if(p1>12){ day=p1; month=p2; }        // p1 must be day → DD/MM
+      else if(p2>12){ day=p2; month=p1; }   // p2 must be day → MM/DD
+      else { day=p2; month=p1; }             // ambiguous → assume MM/DD
+      return new Date(yr, month-1, day, h, mn, sec);
+    }
+
+    // ISO-ish YYYY-MM-DD HH:MM[:SS]
     var m2=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})[T\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?/);
-    if(m2) return new Date(+m2[1],+m2[2]-1,+m2[3],+m2[4],+m2[5],+(m2[6]||0));
-    var d2=new Date(s); if(!isNaN(d2.getTime())) return d2;
+    if(m2){
+      var h=applyAmPm(+m2[4]);
+      return new Date(+m2[1],+m2[2]-1,+m2[3],h,+m2[5],+(m2[6]||0));
+    }
+
+    // Fall-back: native parser (pass original to preserve AM/PM for it)
+    var d2=new Date(v);
+    if(!isNaN(d2.getTime())) return d2;
   }
   return null;
 }
@@ -255,6 +389,7 @@ function handleFile(file){
       if(!joinCol||!leaveCol){ showErr('Cannot find Join/Leave Time columns. Found: '+keys.join(', ')); return; }
       if(!leadsEmailCol&&!leadsPhoneCol){ showErr('Cannot find Leads Email/Phone columns. Found: '+keys.join(', ')); return; }
 
+      // Build attendee index: store as {email, phone, joinMins, leaveMins}
       attendeeRows=[];
       var dateGuess=null;
       for(var i=0;i<rows.length;i++){
@@ -269,6 +404,7 @@ function handleFile(file){
         }
       }
 
+      // Build unique leads
       var seen={};
       leadsRows=[];
       for(var i=0;i<rows.length;i++){
@@ -280,6 +416,7 @@ function handleFile(file){
         if(!seen[key]){ seen[key]=true; leadsRows.push({email:lem,phone:lph}); }
       }
 
+      // Auto-date
       if(dateGuess){
         var y=dateGuess.getFullYear();
         var mo=String(dateGuess.getMonth()+1).padStart(2,'0');
@@ -288,27 +425,35 @@ function handleFile(file){
       }
 
       document.getElementById('fName').textContent=file.name;
-      document.getElementById('fMeta').textContent=attendeeRows.length.toLocaleString()+' attendee records · '+leadsRows.length.toLocaleString()+' unique leads';
+      document.getElementById('fMeta').textContent=attendeeRows.length+' attendee records · '+leadsRows.length+' unique leads';
       document.getElementById('fileLoaded').style.display='flex';
       document.getElementById('controlsPanel').style.display='block';
       document.getElementById('statsRow').style.display='none';
       document.getElementById('resultsPanel').style.display='none';
+      document.getElementById('summaryPanel').style.display='none';
+      document.getElementById('downloadsBar').classList.remove('active');
 
     }catch(err){ console.error(err); showErr('Parse error: '+err.message); }
   };
   reader.readAsArrayBuffer(file);
 }
 
-// ── Core analysis ──────────────────────────────────────────────────────────
+// ── Core analysis — hash map approach O(attendees + leads*slots) ───────────
 // Strategy:
-//  1. Per-slot Sets of emails/phones. For each attendee we only touch the slot
-//     RANGE they overlap (ceil/floor math), not every slot. O(attendees * avgPresent).
-//  2. For each lead, walk slots and look up in the Set. Uint8Array for presence
-//     keeps per-lead memory tiny (1 byte/slot vs ~50-100 bytes for object keys).
-//  3. Matching runs in chunks so the tab stays responsive on big files.
+//  1. For each attendee row, for each slot minute, store email→true & phone→true
+//     in a Set per slot. This is O(attendees * slots).
+//  2. For each lead, check if their email or phone is in the set for that slot.
+//     This is O(leads * slots) with O(1) set lookup.
+// Total: O((attendees + leads) * slots) instead of O(attendees * leads * slots)
+
 function runAnalysis(){
   showErr('');
   if(!attendeeRows.length){ showErr('Upload a file first.'); return; }
+
+  var dp=document.getElementById('meetDate').value.split('-');
+  var yr=+dp[0],mo=+dp[1],dy_=+dp[2];
+  // We don't need date for mins-from-midnight comparison — already extracted
+  // But keep for reference; all rows assumed same meeting day
 
   var sp=document.getElementById('startTime').value.split(':');
   var ep=document.getElementById('endTime').value.split(':');
@@ -319,7 +464,6 @@ function runAnalysis(){
   var cur=sh*60+sm, endm=eh*60+em_;
   while(cur<=endm){ slots.push(cur); cur+=interval; }
   if(!slots.length){ showErr('No slots — check times.'); return; }
-  var startMin = slots[0];
 
   var btn=document.getElementById('runBtn');
   btn.disabled=true; btn.textContent='⏳ Building index…';
@@ -328,93 +472,103 @@ function runAnalysis(){
   var pb=document.getElementById('progressBar');
   var pl=document.getElementById('progressLabel');
   pw.style.display='block'; pb.style.width='0%';
-  pl.textContent='Building slot index…';
 
+  // Use chunked async processing to keep UI responsive
   setTimeout(function(){
     try{
-      // Step 1: build per-slot presence sets using slot-range arithmetic
-      var slotSets=new Array(slots.length);
-      for(var si=0;si<slots.length;si++) slotSets[si]={emails:new Set(),phones:new Set()};
+      // ── Step 1: build per-slot presence sets ──────────────────────────────
+      // slotSets[i] = {emails: Set, phones: Set} for slots[i]
+      // PERF: instead of scanning every slot per attendee, compute the slot
+      // index range arithmetically — O(hits) per attendee instead of O(slots).
+      var slotSets=[];
+      for(var si=0;si<slots.length;si++) slotSets.push({emails:new Set(),phones:new Set()});
+
+      var slotStart = slots[0];
+      var slotsLast = slots.length - 1;
+      var slotEnd   = slots[slotsLast];
 
       for(var ai=0;ai<attendeeRows.length;ai++){
         var att=attendeeRows[ai];
-        var firstSi = Math.max(0, Math.ceil((att.joinMins  - startMin) / interval));
-        var lastSi  = Math.min(slots.length - 1, Math.floor((att.leaveMins - startMin) / interval));
-        for(var si=firstSi; si<=lastSi; si++){
-          if(att.email) slotSets[si].emails.add(att.email);
-          if(att.phone) slotSets[si].phones.add(att.phone);
+        var jm=att.joinMins, lm=att.leaveMins;
+        // Skip if attendee window doesn't overlap the slot range at all
+        if(lm < slotStart || jm > slotEnd) continue;
+
+        var firstIdx = jm <= slotStart ? 0 : Math.ceil((jm - slotStart) / interval);
+        var lastIdx  = lm >= slotEnd   ? slotsLast : Math.floor((lm - slotStart) / interval);
+        if(firstIdx < 0) firstIdx = 0;
+        if(lastIdx > slotsLast) lastIdx = slotsLast;
+
+        var em=att.email, ph=att.phone;
+        for(var si=firstIdx; si<=lastIdx; si++){
+          if(em) slotSets[si].emails.add(em);
+          if(ph) slotSets[si].phones.add(ph);
         }
       }
 
-      pb.style.width='40%';
       pl.textContent='Matching leads…';
+      pb.style.width='50%';
 
-      // Step 2: chunked matching — keeps the UI thread responsive
-      results = [];
-      var li = 0;
-      var totalLeads = leadsRows.length;
-      var CHUNK = 2000;
+      // ── Step 2: check each lead against slot sets ─────────────────────────
+      // Also tally slotCounts here in one pass (used by renderSummary).
+      results=[];
+      slotCounts = new Array(slots.length);
+      for(var si=0;si<slots.length;si++) slotCounts[si]=0;
 
-      function matchChunk() {
-        var stop = Math.min(li + CHUNK, totalLeads);
-        for (; li < stop; li++) {
-          var lead = leadsRows[li];
-          var presence = new Uint8Array(slots.length);
-          var total = 0;
-          for (var si = 0; si < slots.length; si++) {
-            var hit = false;
-            if (lead.email && slotSets[si].emails.has(lead.email)) hit = true;
-            else if (lead.phone && slotSets[si].phones.has(lead.phone)) hit = true;
-            if (hit) { presence[si] = 1; total++; }
-          }
-          results.push({ lead: lead, presence: presence, totalPresent: total });
+      for(var li=0;li<leadsRows.length;li++){
+        var lead=leadsRows[li];
+        var presence={};
+        var total=0;
+        var lem=lead.email, lph=lead.phone;
+        for(var si=0;si<slots.length;si++){
+          var ss=slotSets[si];
+          var hit = (lem && ss.emails.has(lem)) || (lph && ss.phones.has(lph));
+          presence[slots[si]]=hit;
+          if(hit){ total++; slotCounts[si]++; }
         }
-
-        if (li < totalLeads) {
-          var pct = 40 + Math.round(50 * li / totalLeads);
-          pb.style.width = pct + '%';
-          pl.textContent = 'Matching leads… ' + li.toLocaleString() + ' / ' + totalLeads.toLocaleString();
-          setTimeout(matchChunk, 0);
-        } else {
-          finishAnalysis();
-        }
+        results.push({lead:lead,presence:presence,totalPresent:total});
       }
 
-      function finishAnalysis() {
-        results.sort(function(a,b){ return b.totalPresent - a.totalPresent; });
+      results.sort(function(a,b){ return b.totalPresent-a.totalPresent; });
 
-        pb.style.width = '90%';
-        pl.textContent = 'Rendering…';
+      pb.style.width='90%';
+      pl.textContent='Rendering…';
 
-        setTimeout(function() {
-          var attended = 0;
-          for (var i = 0; i < results.length; i++) if (results[i].totalPresent > 0) attended++;
-          var absent = results.length - attended;
+      setTimeout(function(){
+        var attended=results.filter(function(r){ return r.totalPresent>0; }).length;
+        var absent=results.length-attended;
 
-          var sr = document.getElementById('statsRow');
-          sr.style.display = 'grid';
-          var sd = [
-            {n:results.length, label:'Total Leads', cls:'',      c:'#3ecfff'},
-            {n:attended,       label:'Attended',    cls:'green', c:'#00ffa3'},
-            {n:absent,         label:'Absent',      cls:'red',   c:'#ff6b6b'},
-            {n:slots.length,   label:'Time Slots',  cls:'blue',  c:'#3ecfff'}
-          ];
-          sr.innerHTML = sd.map(function(s){
-            return '<div class="stat-card" style="--accent-color:'+s.c+'"><div class="stat-n '+s.cls+'">'+s.n.toLocaleString()+'</div><div class="stat-label">'+s.label+'</div></div>';
-          }).join('');
+        // Auto-enable compact mode for huge matrices to keep the browser fast.
+        // 100k cells is roughly where rendering starts to feel heavy.
+        var cellEstimate = attended * slots.length;
+        var autoCompact = cellEstimate > 100000;
+        document.getElementById('compactToggle').checked = autoCompact;
+        compactMode = autoCompact;
+        currentPage = 0;
 
-          document.getElementById('resultsPanel').style.display = 'block';
-          renderTable();
+        var sr=document.getElementById('statsRow');
+        sr.style.display='grid';
+        var sd=[
+          {n:results.length,label:'Total Leads', cls:'',      c:'#3ecfff'},
+          {n:attended,      label:'Attended',    cls:'green', c:'#00ffa3'},
+          {n:absent,        label:'Absent',      cls:'red',   c:'#ff6b6b'},
+          {n:slots.length,  label:'Time Slots',  cls:'blue',  c:'#3ecfff'}
+        ];
+        sr.innerHTML=sd.map(function(s){
+          return '<div class="stat-card" style="--accent-color:'+s.c+'"><div class="stat-n '+s.cls+'">'+s.n+'</div><div class="stat-label">'+s.label+'</div></div>';
+        }).join('');
 
-          pb.style.width = '100%';
-          pl.textContent = 'Done ✓';
-          btn.textContent = '▶ Run Again';
-          btn.disabled = false;
-          setTimeout(function(){ pw.style.display = 'none'; }, 2000);
-        }, 30);
-      }
+        document.getElementById('resultsPanel').style.display='block';
+        document.getElementById('summaryPanel').style.display='block';
+        document.getElementById('downloadsBar').classList.add('active');
+        renderTable();
+        renderSummary();
 
-      matchChunk();
+        pb.style.width='100%';
+        pl.textContent='Done in seconds ✓';
+        btn.textContent='▶ Run Again';
+        btn.disabled=false;
+        setTimeout(function(){ pw.style.display='none'; },2000);
+      },30);
 
     }catch(err){
       console.error(err);
@@ -423,130 +577,234 @@ function runAnalysis(){
       btn.disabled=false;
       pw.style.display='none';
     }
-  }, 30);
+  },30);
 }
 
-// ── Formatting ─────────────────────────────────────────────────────────────
+// ── Table render ───────────────────────────────────────────────────────────
 function fmtSlot(m){ var h=Math.floor(m/60),mn=m%60,ap=h>=12?'PM':'AM',hh=h>12?h-12:(h===0?12:h); return hh+':'+(mn<10?'0':'')+mn+' '+ap; }
 
-// ── Table render — VIRTUALIZED ─────────────────────────────────────────────
-// We never put the full table in the DOM. Only the visible window (~30 rows)
-// plus two spacer rows that hold open the scroll height. This keeps the DOM
-// node count constant regardless of how many leads we have.
+// Long format with seconds (HH:MM:SS AM/PM) — used by the Attendance Table CSV
+// so the output matches the typical Excel time-of-day display.
+function fmtSlotLong(m){ var h=Math.floor(m/60),mn=m%60,ap=h>=12?'PM':'AM',hh=h>12?h-12:(h===0?12:h); return hh+':'+(mn<10?'0':'')+mn+':00 '+ap; }
 
-function buildHeaderHTML() {
-  var h = '<thead><tr><th style="min-width:200px">Lead Identifier</th><th style="min-width:110px">Score</th>';
-  for (var si = 0; si < slots.length; si++) {
-    var isH = slots[si] % 30 === 0;
-    h += '<th class="slot-hdr' + (isH ? ' is-half' : '') + '">' + fmtSlot(slots[si]) + '</th>';
+function renderTable(){
+  var onlyPresent=document.getElementById('onlyPresent').checked;
+  var filtered=onlyPresent?results.filter(function(r){ return r.totalPresent>0; }):results;
+  var t=document.getElementById('resultTable');
+
+  // ── Pagination math ──
+  var total = filtered.length;
+  var totalPages = Math.max(1, Math.ceil(total / pageSize));
+  if(currentPage >= totalPages) currentPage = totalPages - 1;
+  if(currentPage < 0) currentPage = 0;
+  var startIdx = currentPage * pageSize;
+  var endIdx = Math.min(startIdx + pageSize, total);
+  var pageRows = filtered.slice(startIdx, endIdx);
+
+  // ── Header ──
+  // Using array.push().join('') is much faster than '+=' for big strings.
+  var headParts = ['<thead><tr><th style="min-width:200px">Lead Identifier</th><th style="min-width:110px">Score</th>'];
+  if(!compactMode){
+    for(var si=0;si<slots.length;si++){
+      var isH=slots[si]%30===0;
+      headParts.push('<th class="slot-hdr'+(isH?' is-half':'')+'">'+fmtSlot(slots[si])+'</th>');
+    }
   }
-  return h + '</tr></thead>';
-}
+  headParts.push('</tr></thead>');
 
-function buildRowHTML(r) {
-  var pct = slots.length ? Math.round(r.totalPresent / slots.length * 100) : 0;
-  var id = r.lead.email || r.lead.phone || '—';
-  var out = '<tr class="data-row"><td class="lead-email" title="' + id + '">' + id + '</td>';
-  if (r.totalPresent > 0) {
-    out += '<td class="score"><div>' + r.totalPresent + '/' + slots.length + '</div><div class="mini-bar"><div class="mini-fill" style="width:' + pct + '%"></div></div></td>';
+  // ── Body ──
+  var bodyParts = ['<tbody>'];
+  var nSlots = slots.length;
+  for(var ri=0;ri<pageRows.length;ri++){
+    var r=pageRows[ri];
+    var pct=nSlots?Math.round(r.totalPresent/nSlots*100):0;
+    var id=escapeHtml(r.lead.email||r.lead.phone||'—');
+    bodyParts.push('<tr><td class="lead-email" title="',id,'">',id,'</td>');
+    if(r.totalPresent>0){
+      bodyParts.push('<td class="score"><div>',r.totalPresent,'/',nSlots,'</div><div class="mini-bar"><div class="mini-fill" style="width:',pct,'%"></div></div></td>');
+    } else {
+      bodyParts.push('<td class="score-zero">0/',nSlots,'</td>');
+    }
+    if(!compactMode){
+      var pres = r.presence;
+      for(var si=0;si<nSlots;si++){
+        bodyParts.push(pres[slots[si]]
+          ?'<td class="slot-cell slot-yes">●</td>'
+          :'<td class="slot-cell slot-no">·</td>');
+      }
+    }
+    bodyParts.push('</tr>');
+  }
+  if(!pageRows.length){
+    var cols = compactMode ? 2 : (2+nSlots);
+    bodyParts.push('<tr><td colspan="',cols,'" style="text-align:center;padding:2rem;color:#3d5a72">No results match filter</td></tr>');
+  }
+  bodyParts.push('</tbody>');
+
+  t.innerHTML = headParts.join('') + bodyParts.join('');
+
+  // ── Pagination UI ──
+  var pgWrap = document.getElementById('pagination');
+  if(total > pageSize){
+    pgWrap.classList.add('active');
+    document.getElementById('pageInfo').textContent =
+      'Showing '+(startIdx+1).toLocaleString()+'–'+endIdx.toLocaleString()+' of '+total.toLocaleString()+' leads';
+    document.getElementById('pageNum').textContent = 'Page '+(currentPage+1)+' / '+totalPages;
+    document.getElementById('firstBtn').disabled = currentPage===0;
+    document.getElementById('prevBtn').disabled  = currentPage===0;
+    document.getElementById('nextBtn').disabled  = currentPage>=totalPages-1;
+    document.getElementById('lastBtn').disabled  = currentPage>=totalPages-1;
   } else {
-    out += '<td class="score-zero">0/' + slots.length + '</td>';
+    pgWrap.classList.remove('active');
   }
-  for (var si = 0; si < slots.length; si++) {
-    out += r.presence[si]
-      ? '<td class="slot-cell slot-yes">●</td>'
-      : '<td class="slot-cell slot-no">·</td>';
-  }
-  return out + '</tr>';
 }
 
-function renderTable() {
-  var onlyPresent = document.getElementById('onlyPresent').checked;
-  vState.filtered = onlyPresent ? results.filter(function(r){ return r.totalPresent > 0; }) : results;
-  vState.headerHTML = buildHeaderHTML();
-  vState.start = -1;
-  vState.end   = -1;
-
-  var table = document.getElementById('resultTable');
-  table.innerHTML = vState.headerHTML + '<tbody id="resultTbody"></tbody>';
-
-  // Wire scroll listener once
-  if (!vState.wired) {
-    var sc = document.getElementById('tblScroll');
-    sc.addEventListener('scroll', function() {
-      if (vState.raf) return;
-      vState.raf = requestAnimationFrame(function() {
-        vState.raf = null;
-        updateVisibleRows();
-      });
-    });
-    vState.wired = true;
-  }
-
-  document.getElementById('tblScroll').scrollTop = 0;
-  updateVisibleRows();
+// ── Pagination & filter control handlers ───────────────────────────────────
+function resetAndRender(){ currentPage = 0; renderTable(); }
+function onCompactChange(){ compactMode = document.getElementById('compactToggle').checked; renderTable(); }
+function onPageSizeChange(){ pageSize = parseInt(document.getElementById('pageSize').value,10) || 100; currentPage = 0; renderTable(); }
+function goToPage(p){
+  var onlyPresent=document.getElementById('onlyPresent').checked;
+  var total = onlyPresent ? results.filter(function(r){return r.totalPresent>0;}).length : results.length;
+  var totalPages = Math.max(1, Math.ceil(total / pageSize));
+  if(p<0) p=0; if(p>=totalPages) p=totalPages-1;
+  currentPage = p;
+  renderTable();
+  // Scroll table back to top for new page
+  var ts = document.querySelector('.tbl-scroll');
+  if(ts) ts.scrollTop = 0;
+}
+function goToLastPage(){
+  var onlyPresent=document.getElementById('onlyPresent').checked;
+  var total = onlyPresent ? results.filter(function(r){return r.totalPresent>0;}).length : results.length;
+  goToPage(Math.ceil(total / pageSize) - 1);
 }
 
-function updateVisibleRows() {
-  var tbody = document.getElementById('resultTbody');
-  if (!tbody) return;
-  var filtered = vState.filtered;
-  var colSpan = 2 + slots.length;
+// ── CSV export ─────────────────────────────────────────────────────────────
+// Adds two summary rows at the bottom: TOTAL ATTENDED (count per slot) and
+// ATTENDANCE % (count / total leads). Separated from data by a blank row so
+// Excel filters on the matrix don't pull them in.
+// Phone numbers wrapped in ="..." to stop Excel from rendering them as
+// scientific notation (9.91E+09 → 9911234567).
+function exportCSV(){
+  if(!results.length) return;
+  var totalLeads = results.length;
+  var lines = [];
 
-  if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="' + colSpan + '" style="text-align:center;padding:2rem;color:#3d5a72">No results match filter</td></tr>';
+  // ── Header ──
+  var header = ['Lead Email','Lead Phone','Slots Present','Total Slots'];
+  for(var si=0;si<slots.length;si++) header.push('"'+fmtSlot(slots[si])+'"');
+  lines.push(header.join(','));
+
+  // ── Lead rows ──
+  for(var ri=0;ri<results.length;ri++){
+    var r=results[ri];
+    var email = (r.lead.email||'').replace(/"/g,'""');
+    var phone = (r.lead.phone||'');
+    // ="..." forces Excel/Sheets to treat the cell as text, preserving leading
+    // zeros and avoiding scientific-notation rounding on long numbers.
+    var phoneCell = phone ? '="'+phone+'"' : '';
+    var row = ['"'+email+'"', phoneCell, r.totalPresent, slots.length];
+    for(var si=0;si<slots.length;si++) row.push(r.presence[slots[si]]?'Yes':'No');
+    lines.push(row.join(','));
+  }
+
+  // ── Summary rows (per-slot totals) ──
+  lines.push(''); // blank separator so Excel filters stay scoped to the data
+  var countRow = ['TOTAL ATTENDED','','',''];
+  var pctRow   = ['ATTENDANCE %','','',''];
+  for(var si=0;si<slots.length;si++){
+    var c = slotCounts[si];
+    countRow.push(c);
+    pctRow.push((totalLeads ? (c/totalLeads*100) : 0).toFixed(2)+'%');
+  }
+  lines.push(countRow.join(','));
+  lines.push(pctRow.join(','));
+
+  var csv = lines.join('\n') + '\n';
+  var blob=new Blob([csv],{type:'text/csv'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='attendance_intel.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Escape HTML ────────────────────────────────────────────────────────────
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+// ── Per-slot attendance summary ────────────────────────────────────────────
+// For each slot, count how many leads were present, then compute the % of
+// total leads. Identifies the peak slot for visual emphasis.
+function renderSummary(){
+  if(!results.length || !slots.length){
+    document.getElementById('summaryPanel').style.display='none';
     return;
   }
+  var labelRaw = document.getElementById('sessionLabel').value.trim() || 'Attendance';
+  var label = escapeHtml(labelRaw);
+  var t = document.getElementById('summaryTable');
+  var totalLeads = results.length;
 
-  var sc = document.getElementById('tblScroll');
-  var scrollTop = sc.scrollTop;
-  var viewH = sc.clientHeight || 560;
+  // slotCounts is precomputed during runAnalysis — no scanning needed.
+  var peak = 0;
+  for(var i=0;i<slotCounts.length;i++) if(slotCounts[i]>peak) peak = slotCounts[i];
 
-  var start = Math.max(0, Math.floor(scrollTop / ROW_H) - BUFFER);
-  var end   = Math.min(filtered.length, Math.ceil((scrollTop + viewH) / ROW_H) + BUFFER);
+  var head = '<thead><tr>'
+    + '<th style="min-width:140px">Time</th>'
+    + '<th style="min-width:160px">'+label+'</th>'
+    + '<th style="min-width:140px">Attendance %</th>'
+    + '</tr></thead>';
 
-  // Skip if the visible window hasn't moved
-  if (start === vState.start && end === vState.end) return;
-  vState.start = start;
-  vState.end   = end;
-
-  var topPad = start * ROW_H;
-  var botPad = (filtered.length - end) * ROW_H;
-
-  var parts = [];
-  if (topPad > 0) parts.push('<tr class="spacer"><td colspan="' + colSpan + '" style="height:' + topPad + 'px"></td></tr>');
-  for (var i = start; i < end; i++) parts.push(buildRowHTML(filtered[i]));
-  if (botPad > 0) parts.push('<tr class="spacer"><td colspan="' + colSpan + '" style="height:' + botPad + 'px"></td></tr>');
-
-  tbody.innerHTML = parts.join('');
+  var rows = new Array(slots.length);
+  for(var si=0;si<slots.length;si++){
+    var count = slotCounts[si];
+    var pct = totalLeads ? (count/totalLeads*100) : 0;
+    var isPeak = (count===peak && peak>0);
+    rows[si] = '<tr'+(isPeak?' class="peak-row"':'')+'>'
+      + '<td class="time-col">'+fmtSlot(slots[si])+'</td>'
+      + '<td class="count-col'+(isPeak?' is-peak':'')+'">'+count+'</td>'
+      + '<td class="pct-col">'+pct.toFixed(2)+'%</td>'
+      + '</tr>';
+  }
+  t.innerHTML = head + '<tbody>' + rows.join('') + '</tbody>';
 }
 
-// ── CSV export — streamed into a Blob to avoid one giant string ────────────
-function exportCSV() {
-  if (!results.length) return;
-
-  var chunks = [];
-  var header = 'Lead Email,Lead Phone,Slots Present,Total Slots';
-  for (var si = 0; si < slots.length; si++) header += ',' + fmtSlot(slots[si]);
-  header += '\n';
-  chunks.push(header);
-
-  var rowsPerChunk = 500;
-  var buf = '';
-  for (var ri = 0; ri < results.length; ri++) {
-    var r = results[ri];
-    buf += '"' + (r.lead.email || '') + '","' + (r.lead.phone || '') + '",' + r.totalPresent + ',' + slots.length;
-    for (var si = 0; si < slots.length; si++) buf += ',' + (r.presence[si] ? 'Yes' : 'No');
-    buf += '\n';
-    if ((ri + 1) % rowsPerChunk === 0) { chunks.push(buf); buf = ''; }
+// ── Re-render summary live if user changes the session label ──────────────
+document.addEventListener('input', function(e){
+  if(e.target && e.target.id==='sessionLabel' && results.length){
+    renderSummary();
   }
-  if (buf) chunks.push(buf);
+});
 
-  var blob = new Blob(chunks, { type: 'text/csv;charset=utf-8' });
+// ── Attendance Table CSV (Time · Count · %) ────────────────────────────────
+// Matches the simple 3-column report format. File goes to a clean filename
+// derived from the session label when present.
+function downloadAttendanceTable(){
+  if(!results.length || !slots.length) return;
+  var labelRaw = document.getElementById('sessionLabel').value.trim() || 'Attendance';
+  var labelCsv = '"'+labelRaw.replace(/"/g,'""')+'"';
+  var totalLeads = results.length;
+
+  var lines = ['Time,'+labelCsv+',Attendance %'];
+  for(var si=0;si<slots.length;si++){
+    var count = slotCounts[si];
+    var pct = totalLeads ? (count/totalLeads*100) : 0;
+    lines.push('"'+fmtSlotLong(slots[si])+'",'+count+','+pct.toFixed(2)+'%');
+  }
+  var csv = lines.join('\n') + '\n';
+
+  // Filename from session label (sanitized) — e.g. "Python (Snehil).csv"
+  var safe = labelRaw.replace(/[^a-zA-Z0-9 _()\-]/g,'').trim() || 'attendance_table';
+  var filename = safe + '.csv';
+
+  var blob = new Blob([csv],{type:'text/csv'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
-  a.href = url; a.download = 'attendance_intel.csv';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  a.href=url; a.download=filename; a.click();
   URL.revokeObjectURL(url);
 }
 </script>
